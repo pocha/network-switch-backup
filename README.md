@@ -10,6 +10,7 @@ Download/clone [restic-api](https://github.com/pocha/restic-api) from github. Ch
 
 Once restic & restic-api are installed, visit `localhost:5000` to see the Restic API web UI. 
 
+![restic api image](https://github.com/pocha/restic-api/raw/master/img/restic-screenshot.png)
 
 *The rest of the article assumes that you have ubuntu machine on which you are running the `restic-api` for your switches backup*. If you are on a non ubuntu/linux machine, the command mentioned below to copy the switch config, will change. Rest will stay the same. 
 
