@@ -115,7 +115,14 @@ You should see the config dump on the terminal window.
 
 ## 3. Scheduling backup with Restic API 
 
-- Add a backup location, maybe, a directory on the backup machine, where backup of the configs will be stored. 
+- Add a backup location, maybe, a directory on the backup machine, where backup of the configs will be stored. You need to provide password for the location & the same password is required while scheduling & restoring backup. So remember the backup location password is important :). 
+
+![Add Backup](screenshots/add-backup.png)
+
 - Under `Schedule Backup`, choose `Command`. Specify command as the same that we tested before - `scp -O <switch-user>@<switch-ip>:/cfg/running-config /dev/stdout`. In `Filename`, specify a unique name to identify the backup file. 
-- Once backup is scheduled, click on 'Backup Now' button next to the scheduled backup to check if backup works. 
+
+![Schedule Backup](screenshots/schedule-backup.png)
+
+- Once backup is scheduled, click on 'Backup Now' button next to the scheduled backup to check if backup works.
+ 
 - Once a backup is taken, go to `Restore` section, choose the appropriate backup location & restore directory option, click on Restore. It should list at least one backup snapshot. You can restore the backup in `/tmp` location & it should create `/tmp/<filename>` which you can compare with the config of the switch. 
