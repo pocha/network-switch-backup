@@ -117,7 +117,7 @@ You should see the config dump on the terminal window.
 
 - Add a backup location, maybe, a directory on the backup machine, where backup of the configs will be stored. You need to provide password for the location & the same password is required while scheduling & restoring backup. So remember the backup location password is important :). 
 
-![Add Backup](screenshots/add-backup.png)
+![Add Backup](screenshots/add-backup-1.png)
 
 - Under `Schedule Backup`, choose `Command`. Specify command as the same that we tested before - `scp -O <switch-user>@<switch-ip>:/cfg/running-config /dev/stdout`. In `Filename`, specify a unique name to identify the backup file. 
 
