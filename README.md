@@ -15,7 +15,7 @@ Navigate to [https://github.com/restic/restic/releases](https://github.com/resti
 
 ![Restic Binaries List](screenshots/restic-binaries-list.png)
 
-For Ubuntu, running on Intel based machines, the right one will be `restic_0.18.1_freebsd_amd64.bz2`. Download & unzip it using bunzip2
+For Ubuntu, running on Intel based machines, the right one will be `restic_0.18.1_linux_amd64.bz2`. Download & unzip it using bunzip2
 
 ```
 bunzip2 restic_0.18.1_freebsd_amd64.bz2
@@ -24,7 +24,7 @@ bunzip2 restic_0.18.1_freebsd_amd64.bz2
 Move the generated binary to /usr/local/bin directory
 
 ```
-sudo mv restic_0.18.1 /usr/local/bin
+sudo mv restic_0.18.1<tab> /usr/local/bin
 ```
 
 Run `restic version` to check if restic is installed & it should show the version
