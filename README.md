@@ -1,59 +1,117 @@
-## Aruba switches config backup
+# Aruba switches config backup
 
 The steps here can backup pretty much any switch config but since I had to work with Aruba switches, the exact steps are presented for it. But if you look to backup config of switches, network device or any other device which allows for picking the config from it through `scp` or any other command, this setup is going to work for you. 
 
-We use `restic-api`, a web based backup tool that uses `restic` binary to do the backup. The tool has `command` support where you can execute a command, store the output of it to a file & then backup the file. `restic-api` provides a nice UI so that you do not have to worry about remember the `restic` commands. 
+We use [restic-api](https://github.com/pocha/restic-api), a web based backup tool that uses [restic](https://github.com/restic/restic) binary to do the backup.
 
-## 1. Install Restic API & restic binary 
+# Setup/Installation steps
 
-Download/clone [restic-api](https://github.com/pocha/restic-api) from github. Check `install` folder for the installation steps. You need to have `restic` backup tool installed on the machine. `restic-api` uses restic to do the backup. You can download the latest restic binary from [https://github.com/restic/restic/releases](https://github.com/restic/restic/releases) before setting up `restic-api`
+You need to choose a computer where `restic-api` will be installed & setup, it will be doing daily backup of the switches. You can choose any computer but the steps are tested to work on an Ubuntu computer. 
 
-Once restic & restic-api are installed, visit `localhost:5000` to see the Restic API web UI. 
+
+## 1. Install restic binary
+
+Navigate to [https://github.com/restic/restic/releases](https://github.com/restic/restic/releases). Scroll down to the list of installable files under **Assets** title. Download & install the one relevant for your machine. 
+
+![Restic Binaries List](screenshots/restic-binaries-list.png)
+
+For Ubuntu, running on Intel based machines, the right one will be `restic_0.18.1_freebsd_amd64.bz2`. Download & unzip it using bunzip2
+
+```
+bunzip2 restic_0.18.1_freebsd_amd64.bz2
+```
+
+Move the generated binary to /usr/local/bin directory
+
+```
+sudo mv restic_0.18.1 /usr/local/bin
+```
+
+Run `restic version` to check if restic is installed & it should show the version
+
+## 2. Install Restic API 
+
+Install git if not installed 
+
+```
+sudo apt install git
+```
+
+Git clone [restic-api](https://github.com/pocha/restic-api) & run the installer inside the `install` directory
+
+```
+git clone https://github.com/pocha/restic-api
+cd restic-api/install
+sudo ./install-linux.sh 
+```
+
+Navigate to `http://localhost:5000` to see the User Interface on the web. 
 
 ![restic api image](https://github.com/pocha/restic-api/raw/master/img/restic-screenshot.png)
 
-*The rest of the article assumes that you have ubuntu machine on which you are running the `restic-api` for your switches backup*. If you are on a non ubuntu/linux machine, the command mentioned below to copy the switch config, will change. Rest will stay the same. 
 
-
-## 2. Switch configuration changes
+## 3. Switch configuration changes
 
 We need to ensure that machine running `restic-api` can `scp` the config from the switches to itself & then back it up. Below are the steps to ensure the same. 
 
-Make sure scp is enabled on the switche. For Aruba switch, ssh into the device, run `config` command & then execute 
+Enable filetransfer on ssh by adding the below line in the configuration 
 
 ```
 ip ssh filetransfer
 ```
 
+**Public-key based access without password**
 
-Enable public key authentication so that password is not required for the scp
+If you do NOT use RADIUS/tacacs authentication & have local users built into the switch, enable ssh authentication to use public-key & add the public-key of the machine on which restic-api & restic binaries are installed. 
 
-```
-aaa authentication ssh enable public-key
-```
-
-Add public key of the machine running `restic-api`
 
 ```
-ip ssh public-key manager 'ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' username manager 
+aaa authentication ssh login public-key
+ip ssh public-key manager 'ssh-rsa xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx' username <username> 
 ```
 
-Aruba switch only takes rsa public key. The default key generation might not be rsa. Generate rsa key with 
+Replace `<username>` with the user created for the switch. The user is assumed to have manager level access so that it can access the configuration. 
+
+The content within 'ssh-rsa xxxx' is the `~/.ssh/id_rsa.pub` file content that is generated from `ssh-keygen` command. Aruba switch only takes rsa public key. The default key generation might not be rsa. Generate rsa key with 
 
 ```
 ssh-keygen -t rsa
 ```
-command on the machine `restic-api` is running. You can leave the password prompt empty (press enter without any inputs|).
 
-The part `ssh-rsa ....` in `ip ssh public-key manager 'ssh-rsa ...'` command is basically content of file `~/.ssh/id_rsa.pub`, which gets generated by `ssh-keygen` command. 
+command on the backup machine. You can leave the password prompt empty (press enter without any inputs|).
 
-**Important** - To check if it all worked well, run 
+To test if this is working fine, run the following command 
 
 ```
-scp -O <switch user>@<switch ip>:/cfg/running-config /dev/stdout
+scp -O <username>@<switch-ip>:/cfg/running-config /dev/stdout
+```
+You should see the config dumped on the stdout & there should NOT be any password prompt. 
+
+
+**RADIUS/tacacs setup steps**
+
+If you are running RADIUS/tacacs server, create a user for file backup process with manager level access in RADIUS/tacacs server.
+
+Install `sshpass` on the backup ubuntu machine
+
+```
+sudo apt install sshpass
 ```
 
-on the machine where `restic-api` is running. You should see a dump of config without a password prompt. If it does not happen, something is still wrong & automated backup will NOT work. 
+Add the password of the user created in RADIUS server in a file at a convenient location (home of the linux user on ubuntu machine).
+
+```
+echo "<password>" > ~/password
+chmod 400 ~/password
+```
+
+Now run the command to get the configuration
+
+```
+sshpass -f ~/password scp -O <username>@<switch-ip>:/cfg/running-config /dev/stdout
+```
+
+You should see the config dump on the terminal window. 
 
 ## 3. Scheduling backup with Restic API 
 
