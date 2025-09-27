@@ -125,4 +125,6 @@ You should see the config dump on the terminal window.
 
 - Once backup is scheduled, click on 'Backup Now' button next to the scheduled backup to check if backup works.
  
-- Once a backup is taken, go to `Restore` section, choose the appropriate backup location & restore directory option, click on Restore. It should list at least one backup snapshot. You can restore the backup in `/tmp` location & it should create `/tmp/<filename>` which you can compare with the config of the switch. 
+- Once a backup is taken, go to `Restore` section, choose the appropriate backup location & restore directory option, click on Restore. It should list at least one backup snapshot. You can restore the backup in `/tmp` location & it should create `/tmp/<filename>` which you can compare with the config of the switch.
+
+ 
